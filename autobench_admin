@@ -301,11 +301,11 @@ run_test
 }
 
 #---------------------------------------------------------------------------
-# test_host ($config_ref, $rate, $server, $uri, $port, $clients_ref)
+# test_host ($config_ref, $rate, $server, $uri, $port, $ssl, $clients_ref)
 sub
 test_host 
 {
-    my ($config_ref, $rate, $server, $uri, $port, $clients_ref) = @_;
+    my ($config_ref, $rate, $server, $uri, $port, $ssl, $clients_ref) = @_;
     my (%results, $httperf_args, $extra_httperf_opts);
     $extra_httperf_opts = '';
 
@@ -321,7 +321,7 @@ test_host
 	"--num-conn ".$$config_ref{num_conn}.
 	" --num-call ".$$config_ref{num_call}.
 	" --timeout ".$$config_ref{timeout}.
-        " --rate $rate --port $port $extra_httperf_opts";
+        " --rate $rate --port $port $ssl $extra_httperf_opts";
 
     %results = %{run_test($httperf_args, $clients_ref)};
 
@@ -342,7 +342,7 @@ GetOptions( \%config, "host1:s","host2:s","uri1:s","uri2:s","port1:i",
             "port2:i","low_rate:i","high_rate:i","rate_step:i",
             "num_conn:i","num_call:i","timeout:i","quiet","single_host",
 	    "output_fmt=s","file=s","clients=s","version","debug",
-            "const_test_time:i");
+            "const_test_time:i","ssl1","ssl2");
 $DEBUG = 1 if (defined $config{debug});
 
 if ($config{version}) {
@@ -382,39 +382,29 @@ else {
 # Print first line of output
 # The following is really quite ugly...
 print OUT "dem_req_rate".$sep.
-       "req_rate_$config{host1}".$sep.
-       "con_rate_$config{host1}".$sep.
-       "min_rep_rate_$config{host1}".$sep.
-       "avg_rep_rate_$config{host1}".$sep.
-       "max_rep_rate_$config{host1}".$sep.
-       "stddev_rep_rate_$config{host1}".$sep.
-       "resp_time_$config{host1}".$sep.
-       "net_io_$config{host1}".$sep.
-       "errors_$config{host1}".$sep.
-       "status_100_$config{host1}".$sep.
-       "status_200_$config{host1}".$sep.
-       "status_300_$config{host1}".$sep.
-       "status_400_$config{host1}".$sep.
-       "status_500_$config{host1}";
+       "req_rate_$config{host1}_$config{port1}".$sep.
+       "con_rate_$config{host1}_$config{port1}".$sep.
+       "min_rep_rate_$config{host1}_$config{port1}".$sep.
+       "avg_rep_rate_$config{host1}_$config{port1}".$sep.
+       "max_rep_rate_$config{host1}_$config{port1}".$sep.
+       "stddev_rep_rate_$config{host1}_$config{port1}".$sep.
+       "resp_time_$config{host1}_$config{port1}".$sep.
+       "net_io_$config{host1}_$config{port1}".$sep.
+       "errors_$config{host1}_$config{port1}";
 
 if ($config{single_host}) {
     print OUT "\n";
 }
 else {
-    print OUT $sep."req_rate_$config{host2}".$sep.
-       "con_rate_$config{host2}".$sep.
-       "min_rep_rate_$config{host2}".$sep.
-       "avg_rep_rate_$config{host2}".$sep.
-       "max_rep_rate_$config{host2}".$sep.
-       "stddev_rep_rate_$config{host2}".$sep.
-       "resp_time_$config{host2}".$sep.
-       "net_io_$config{host2}".$sep.
-       "errors_$config{host2}".$sep.
-       "status_100_$config{host2}".$sep.
-       "status_200_$config{host2}".$sep.
-       "status_300_$config{host2}".$sep.
-       "status_400_$config{host2}".$sep.
-       "status_500_$config{host2}\n";
+    print OUT $sep."req_rate_$config{host2}_$config{port2}".$sep.
+       "con_rate_$config{host2}_$config{port2}".$sep.
+       "min_rep_rate_$config{host2}_$config{port2}".$sep.
+       "avg_rep_rate_$config{host2}_$config{port2}".$sep.
+       "max_rep_rate_$config{host2}_$config{port2}".$sep.
+       "stddev_rep_rate_$config{host2}_$config{port2}".$sep.
+       "resp_time_$config{host2}_$config{port2}".$sep.
+       "net_io_$config{host2}_$config{port2}".$sep.
+       "errors_$config{host2}_$config{port2}\n";
 }
 
 my $conn_total = $config{num_conn};
@@ -431,12 +421,12 @@ for ($curr_rate = $config{low_rate}; $curr_rate <= $config{high_rate};
     print STDERR `date`;
     # Test Host 1
     print STDERR "Testing server $config{host1} at rate: $curr_rate\n";
-    %res_host1 = %{test_host (\%config, $shared_rate, $config{host1}, $config{uri1}, $config{port1}, \%clients)};
+    %res_host1 = %{test_host (\%config, $shared_rate, $config{host1}, $config{uri1}, $config{port1}, $config{ssl1}, \%clients)};
     
     # Test Host 2
     unless ( $config{single_host} ) {
 	print STDERR "About to test $config{host2} at rate: $curr_rate\n";
-	%res_host2 = %{test_host (\%config, $shared_rate, $config{host2}, $config{uri2}, $config{port2}, \%clients)};
+	%res_host2 = %{test_host (\%config, $shared_rate, $config{host2}, $config{uri2}, $config{port2}, $config{ssl2}, \%clients)};
     } 
 
     # Merge and Display Results
@@ -450,12 +440,7 @@ for ($curr_rate = $config{low_rate}; $curr_rate <= $config{high_rate};
 	  $res_host1{rep_rate_stdv}.$sep.
           $res_host1{rep_time}.$sep.
 	  $res_host1{net_io}.$sep.
-          $res_host1{percent_errors}.$sep.
-          $res_host1{status_100}.$sep.
-          $res_host1{status_200}.$sep.
-          $res_host1{status_300}.$sep.
-          $res_host1{status_400}.$sep.
-          $res_host1{status_500};
+          $res_host1{percent_errors};
     if ($config{single_host}) {
 	print OUT "\n";
     }
@@ -468,12 +453,7 @@ for ($curr_rate = $config{low_rate}; $curr_rate <= $config{high_rate};
 	  $res_host2{rep_rate_stdv}.$sep.
 	  $res_host2{rep_time}.$sep.
 	  $res_host2{net_io}.$sep.
-	  $res_host2{percent_errors}.$sep.
-          $res_host2{status_100}.$sep.
-          $res_host2{status_200}.$sep.
-          $res_host2{status_300}.$sep.
-          $res_host2{status_400}.$sep.
-          $res_host2{status_500}."\n";
+	  $res_host2{percent_errors}."\n";	   
     }
 
 }
