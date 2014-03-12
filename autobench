@@ -142,7 +142,7 @@ test_host
 	}
     }
     check_present($config_ref, qw(num_conn num_call timeout));
-    my $httperf_command = "httperf --server $server --uri \"$uri\" --num-conn ".
+    my $httperf_command = "httperf --server $server --wlog n,\"$uri\" --num-conn ".
 	  $$config_ref{num_conn}." --num-call ".
 	  $$config_ref{num_call}." --timeout ".
 	  $$config_ref{timeout}." --rate $rate --port $port".
