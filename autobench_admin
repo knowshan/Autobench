@@ -389,6 +389,11 @@ print OUT "dem_req_rate".$sep.
        "max_rep_rate_$config{host1}_$config{port1}".$sep.
        "stddev_rep_rate_$config{host1}_$config{port1}".$sep.
        "resp_time_$config{host1}_$config{port1}".$sep.
+       "1xx_$config{host1}_$config{port1}".$sep.
+       "2xx_$config{host1}_$config{port1}".$sep.
+       "3xx_$config{host1}_$config{port1}".$sep.
+       "4xx_$config{host1}_$config{port1}".$sep.
+       "5xx_$config{host1}_$config{port1}".$sep.
        "net_io_$config{host1}_$config{port1}".$sep.
        "errors_$config{host1}_$config{port1}";
 
@@ -403,8 +408,13 @@ else {
        "max_rep_rate_$config{host2}_$config{port2}".$sep.
        "stddev_rep_rate_$config{host2}_$config{port2}".$sep.
        "resp_time_$config{host2}_$config{port2}".$sep.
+       "1xx_$config{host2}_$config{port1}".$sep.
+       "2xx_$config{host2}_$config{port1}".$sep.
+       "3xx_$config{host2}_$config{port1}".$sep.
+       "4xx_$config{host2}_$config{port1}".$sep.
+       "5xx_$config{host2}_$config{port1}".$sep.
        "net_io_$config{host2}_$config{port2}".$sep.
-       "errors_$config{host2}_$config{port2}\n";
+       "errors_$config{host2}_$config{port2}";
 }
 
 my $conn_total = $config{num_conn};
@@ -438,9 +448,14 @@ for ($curr_rate = $config{low_rate}; $curr_rate <= $config{high_rate};
 	  $res_host1{rep_rate_avg}.$sep.
 	  $res_host1{rep_rate_max}.$sep.
 	  $res_host1{rep_rate_stdv}.$sep.
-          $res_host1{rep_time}.$sep.
+      	  $res_host1{rep_time}.$sep.
+	  "$res_host1{status_100}".$sep.
+	  $res_host1{status_200}.$sep.
+	  $res_host1{status_300}.$sep.
+	  $res_host1{status_400}.$sep.
+	  $res_host1{status_500}.$sep.
 	  $res_host1{net_io}.$sep.
-          $res_host1{percent_errors};
+      $res_host1{percent_errors};
     if ($config{single_host}) {
 	print OUT "\n";
     }
@@ -452,6 +467,11 @@ for ($curr_rate = $config{low_rate}; $curr_rate <= $config{high_rate};
 	  $res_host2{rep_rate_max}.$sep.
 	  $res_host2{rep_rate_stdv}.$sep.
 	  $res_host2{rep_time}.$sep.
+	  $res_host2{status_100}.$sep.
+	  $res_host2{status_200}.$sep.
+	  $res_host2{status_300}.$sep.
+	  $res_host2{status_400}.$sep.
+	  $res_host2{status_500}.$sep.
 	  $res_host2{net_io}.$sep.
 	  $res_host2{percent_errors}."\n";	   
     }
